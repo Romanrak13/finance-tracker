@@ -11,9 +11,5 @@ export default async function AuthLayout({ children }: { children: ReactNode }) 
     redirect("/");
   }
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-950 text-slate-50">
-      {children}
-    </div>
-  );
+  return <>{children}</>;
 }

@@ -1,21 +1,18 @@
-// app/layout.tsx
-import type { Metadata } from 'next';
-import './globals.css';
+import type { Metadata } from "next";
+import { MUIThemeProvider } from "@/components/providers/theme-provider";
+import "./globals.css";
 
 export const metadata: Metadata = {
-  title: 'Finance Tracker',
-  description: 'AI-powered personal finance & subscriptions tracker',
+  title: "Finance Tracker",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-slate-950 text-slate-50">
-        {children}
+      <body>
+        <MUIThemeProvider>
+          {children}
+        </MUIThemeProvider>
       </body>
     </html>
   );
