@@ -1,13 +1,9 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState, useMemo, type ReactNode } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
-  AppBar,
-  Toolbar,
-  IconButton,
-  Typography,
   Drawer,
   List,
   ListItemButton,
@@ -16,16 +12,20 @@ import {
   Box,
   Divider,
   Avatar,
-  Tooltip,
-  useTheme,
-  useMediaQuery,
+  Typography,
+  IconButton,
+  Menu,
+  MenuItem,
+  Toolbar,
 } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import DashboardIcon from "@mui/icons-material/SpaceDashboardOutlined";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLongOutlined";
 import SubscriptionsIcon from "@mui/icons-material/SubscriptionsOutlined";
 import InsightsIcon from "@mui/icons-material/InsightsOutlined";
 import SettingsIcon from "@mui/icons-material/SettingsOutlined";
+import { createSupabaseBrowserClient } from "@/lib/supabase/ client";
+
 
 const drawerWidth = 260;
 
@@ -54,13 +54,30 @@ const navItems = [
 ];
 
 export function DashboardShell({ children }: { children: ReactNode }) {
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const pathname = usePathname();
-  const theme = useTheme();
-  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
+  const [profileMenuAnchor, setProfileMenuAnchor] =
+    useState<null | HTMLElement>(null);
 
-  const handleDrawerToggle = () => {
-    setMobileOpen((prev) => !prev);
+  const pathname = usePathname();
+  const router = useRouter();
+
+  const supabase = useMemo(() => createSupabaseBrowserClient(), []);
+
+  const handleProfileMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setProfileMenuAnchor(event.currentTarget);
+  };
+
+  const handleProfileMenuClose = () => {
+    setProfileMenuAnchor(null);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      handleProfileMenuClose();
+      router.push("/login");
+    } catch (e) {
+      console.error("Logout error:", e);
+    }
   };
 
   const drawer = (
@@ -69,11 +86,12 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        bgcolor: "rgba(15,23,42,0.98)", 
+        bgcolor: "rgba(15,23,42,0.98)",
+        borderRight: "1px solid rgb(30 41 59)",
       }}
-      className="border-r border-slate-800"
     >
-      <Box className="px-4 pt-5 pb-4">
+      {/* Logo / Title */}
+      <Box sx={{ px: 4, pt: 5, pb: 4 }}>
         <Typography
           variant="overline"
           sx={{ letterSpacing: 2, color: "primary.main" }}
@@ -87,6 +105,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 
       <Divider sx={{ borderColor: "rgba(148,163,184,0.3)" }} />
 
+      {/* Nav items */}
       <List sx={{ py: 1, flex: 1 }}>
         {navItems.map((item) => {
           const selected = pathname === item.href;
@@ -129,25 +148,70 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         })}
       </List>
 
-      <Box className="px-4 pb-4">
-        <Box className="flex items-center gap-3 rounded-2xl bg-slate-900/80 px-3 py-2">
+      {/* Profile block */}
+      <Box sx={{ px: 4, pb: 4 }}>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 3,
+            borderRadius: 4,
+            bgcolor: "rgba(15, 23, 42, 0.8)",
+            px: 3,
+            py: 2,
+          }}
+        >
           <Avatar
             sx={{ width: 32, height: 32, fontSize: 14 }}
             alt="User avatar"
           >
             R
           </Avatar>
-          <Box className="flex flex-col">
-            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              flex: 1,
+              minWidth: 0,
+            }}
+          >
+            <Typography variant="body2" sx={{ fontWeight: 500 }} noWrap>
               Roman Rak
             </Typography>
             <Typography
               variant="caption"
               sx={{ color: "rgba(148,163,184,0.9)" }}
+              noWrap
             >
               Personal plan
             </Typography>
           </Box>
+
+          <IconButton
+            size="small"
+            onClick={handleProfileMenuOpen}
+            sx={{ color: "rgba(148,163,184,0.9)" }}
+          >
+            <MoreVertIcon fontSize="small" />
+          </IconButton>
+
+          <Menu
+            anchorEl={profileMenuAnchor}
+            open={Boolean(profileMenuAnchor)}
+            onClose={handleProfileMenuClose}
+            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+            transformOrigin={{ vertical: "top", horizontal: "right" }}
+          >
+            <MenuItem
+              component={Link}
+              href="/profile"
+              onClick={handleProfileMenuClose}
+            >
+              Profile
+            </MenuItem>
+            <MenuItem onClick={handleLogout}>Logout</MenuItem>
+          </Menu>
         </Box>
       </Box>
     </Box>
@@ -155,62 +219,50 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 
   return (
     <Box
-      sx={{ display: "flex", minHeight: "100vh" }}
-      className="bg-slate-950 text-slate-50"
+      sx={{
+        display: "flex",
+        minHeight: "100vh",
+        bgcolor: "#020617",
+        color: "#f8fafc",
+      }}
     >
-
-      {/* Sidebar: desktop */}
-      {isDesktop && (
-        <Drawer
-          variant="permanent"
-          open
-          sx={{
+      <Drawer
+        variant="permanent"
+        open
+        sx={{
+          width: drawerWidth,
+          flexShrink: 0,
+          "& .MuiDrawer-paper": {
             width: drawerWidth,
-            flexShrink: 0,
-            "& .MuiDrawer-paper": {
-              width: drawerWidth,
-              boxSizing: "border-box",
-              bgcolor: "transparent",
-              border: "none",
-            },
-          }}
-        >
-          {drawer}
-        </Drawer>
-      )}
+            boxSizing: "border-box",
+            bgcolor: "transparent",
+            border: "none",
+          },
+        }}
+      >
+        {drawer}
+      </Drawer>
 
-      {/* Sidebar: mobile */}
-      {!isDesktop && (
-        <Drawer
-          variant="temporary"
-          open={mobileOpen}
-          onClose={handleDrawerToggle}
-          ModalProps={{ keepMounted: true }}
-          sx={{
-            "& .MuiDrawer-paper": {
-              width: drawerWidth,
-              boxSizing: "border-box",
-              bgcolor: "transparent",
-              border: "none",
-            },
-          }}
-        >
-          {drawer}
-        </Drawer>
-      )}
-
-      {/* Main content */}
       <Box
         component="main"
         sx={{
           flexGrow: 1,
           minHeight: "100vh",
-          bgcolor: "radial-gradient(circle at 0% 0%, rgba(37,99,235,0.18), transparent 55%), radial-gradient(circle at 100% 100%, rgba(34,197,94,0.14), transparent 55%), #020617",
+          bgcolor:
+            "radial-gradient(circle at 0% 0%, rgba(37,99,235,0.18), transparent 55%), radial-gradient(circle at 100% 100%, rgba(34,197,94,0.14), transparent 55%), #020617",
         }}
       >
-        {/* offset for AppBar */}
+        {/* offset for any future AppBar */}
         <Toolbar />
-        <Box className="p-4 md:p-6 max-w-6xl mx-auto">{children}</Box>
+        <Box
+          sx={{
+            p: 6,
+            maxWidth: "72rem",
+            mx: "auto",
+          }}
+        >
+          {children}
+        </Box>
       </Box>
     </Box>
   );
