@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { MUIThemeProvider } from "@/components/providers/theme-provider";
+import { ThemeContextProvider } from "@/contexts/ThemeContext";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -10,9 +10,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <MUIThemeProvider>
+        <ThemeContextProvider>
           {children}
-        </MUIThemeProvider>
+        </ThemeContextProvider>
       </body>
     </html>
   );

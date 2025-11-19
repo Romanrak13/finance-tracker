@@ -17,6 +17,7 @@ import MailOutlineIcon from "@mui/icons-material/MailOutline";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Visibility from "@mui/icons-material/Visibility";
 import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import { useTheme } from "@/contexts/ThemeContext";
 
 type RegisterFormProps = {
   action: (formData: FormData) => void | Promise<void>;
@@ -24,11 +25,21 @@ type RegisterFormProps = {
 
 export default function RegisterForm({ action }: RegisterFormProps) {
   const [showPassword, setShowPassword] = React.useState(false);
+  const { mode } = useTheme();
 
   return (
     <Box
       component="main"
-      className="min-h-screen flex items-center justify-center bg-linear-to-br from-blue-600 via-slate-950 to-emerald-500 px-2"
+      sx={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        px: 2,
+        background: mode === 'dark' 
+          ? "linear-gradient(135deg, #2563eb 0%, #0f172a 50%, #059669 100%)"
+          : "linear-gradient(135deg, #3b82f6 0%, #f1f5f9 50%, #10b981 100%)",
+      }}
     >
       <Container maxWidth="sm">
         <Paper
@@ -37,8 +48,11 @@ export default function RegisterForm({ action }: RegisterFormProps) {
             borderRadius: 4,
             p: { xs: 3, sm: 4 },
             backdropFilter: "blur(18px)",
-            backgroundColor: "#0f172afa",
-            border: "1px solid rgba(148,163,184,0.4)",
+            backgroundColor: mode === 'dark' ? "#0f172afa" : "rgba(255,255,255,0.95)",
+            border: mode === 'dark' 
+              ? "1px solid rgba(148,163,184,0.4)" 
+              : "1px solid rgba(203,213,225,0.4)",
+            color: mode === 'dark' ? '#f8fafc' : '#0f172a',
           }}
         >
           <Stack spacing={3}>
@@ -46,24 +60,38 @@ export default function RegisterForm({ action }: RegisterFormProps) {
             <Box>
               <Typography
                 variant="overline"
-                className="tracking-widest text-blue-400"
+                sx={{ 
+                  letterSpacing: 2, 
+                  color: "primary.main",
+                  fontWeight: 600 
+                }}
               >
                 FINANCE TRACKER
               </Typography>
               <Typography
                 variant="h4"
                 component="h1"
-                className="font-semibold mt-2"
+                sx={{ 
+                  fontWeight: 600, 
+                  mt: 2,
+                  color: mode === 'dark' ? '#f8fafc' : '#0f172a'
+                }}
               >
                 Create account
               </Typography>
-              <Typography variant="body2" className="text-slate-400 mt-2">
+              <Typography 
+                variant="body2" 
+                sx={{ 
+                  color: mode === 'dark' ? "rgba(148,163,184,0.9)" : "rgba(100,116,139,0.9)",
+                  mt: 2 
+                }}
+              >
                 Start tracking your spending, subscriptions and get AI insights.
               </Typography>
             </Box>
 
             {/* Form */}
-            <Box component="form" action={action} noValidate className="mt-4">
+            <Box component="form" action={action} noValidate sx={{ mt: 4 }}>
               <Stack spacing={2.5}>
                 <TextField
                   label="Email"
@@ -82,17 +110,23 @@ export default function RegisterForm({ action }: RegisterFormProps) {
                   }}
                   sx={{
                     "& input:-webkit-autofill": {
-                      WebkitBoxShadow: "0 0 0 1000px #0f172afa inset",
-                      WebkitTextFillColor: "#f1f5f9",
+                      WebkitBoxShadow: mode === 'dark' 
+                        ? "0 0 0 1000px #0f172afa inset"
+                        : "0 0 0 1000px rgba(255,255,255,0.95) inset",
+                      WebkitTextFillColor: mode === 'dark' ? "#f1f5f9" : "#0f172a",
                       transition: "background-color 5000s ease-in-out 0s",
                     },
                     "& input:-webkit-autofill:hover": {
-                      WebkitBoxShadow: "0 0 0 1000px #0f172afa inset",
-                      WebkitTextFillColor: "#f1f5f9",
+                      WebkitBoxShadow: mode === 'dark' 
+                        ? "0 0 0 1000px #0f172afa inset"
+                        : "0 0 0 1000px rgba(255,255,255,0.95) inset",
+                      WebkitTextFillColor: mode === 'dark' ? "#f1f5f9" : "#0f172a",
                     },
                     "& input:-webkit-autofill:focus": {
-                      WebkitBoxShadow: "0 0 0 1000px #0f172afa inset",
-                      WebkitTextFillColor: "#f1f5f9",
+                      WebkitBoxShadow: mode === 'dark' 
+                        ? "0 0 0 1000px #0f172afa inset"
+                        : "0 0 0 1000px rgba(255,255,255,0.95) inset",
+                      WebkitTextFillColor: mode === 'dark' ? "#f1f5f9" : "#0f172a",
                     },
                   }}
                 />
@@ -131,17 +165,23 @@ export default function RegisterForm({ action }: RegisterFormProps) {
                   }}
                   sx={{
                     "& input:-webkit-autofill": {
-                      WebkitBoxShadow: "0 0 0 1000px #0f172afa inset",
-                      WebkitTextFillColor: "#f1f5f9",
+                      WebkitBoxShadow: mode === 'dark' 
+                        ? "0 0 0 1000px #0f172afa inset"
+                        : "0 0 0 1000px rgba(255,255,255,0.95) inset",
+                      WebkitTextFillColor: mode === 'dark' ? "#f1f5f9" : "#0f172a",
                       transition: "background-color 5000s ease-in-out 0s",
                     },
                     "& input:-webkit-autofill:hover": {
-                      WebkitBoxShadow: "0 0 0 1000px #0f172afa inset",
-                      WebkitTextFillColor: "#f1f5f9",
+                      WebkitBoxShadow: mode === 'dark' 
+                        ? "0 0 0 1000px #0f172afa inset"
+                        : "0 0 0 1000px rgba(255,255,255,0.95) inset",
+                      WebkitTextFillColor: mode === 'dark' ? "#f1f5f9" : "#0f172a",
                     },
                     "& input:-webkit-autofill:focus": {
-                      WebkitBoxShadow: "0 0 0 1000px #0f172afa inset",
-                      WebkitTextFillColor: "#f1f5f9",
+                      WebkitBoxShadow: mode === 'dark' 
+                        ? "0 0 0 1000px #0f172afa inset"
+                        : "0 0 0 1000px rgba(255,255,255,0.95) inset",
+                      WebkitTextFillColor: mode === 'dark' ? "#f1f5f9" : "#0f172a",
                     },
                   }}
                 />
@@ -180,22 +220,34 @@ export default function RegisterForm({ action }: RegisterFormProps) {
                   }}
                   sx={{
                     "& input:-webkit-autofill": {
-                      WebkitBoxShadow: "0 0 0 1000px #0f172afa inset",
-                      WebkitTextFillColor: "#f1f5f9",
+                      WebkitBoxShadow: mode === 'dark' 
+                        ? "0 0 0 1000px #0f172afa inset"
+                        : "0 0 0 1000px rgba(255,255,255,0.95) inset",
+                      WebkitTextFillColor: mode === 'dark' ? "#f1f5f9" : "#0f172a",
                       transition: "background-color 5000s ease-in-out 0s",
                     },
                     "& input:-webkit-autofill:hover": {
-                      WebkitBoxShadow: "0 0 0 1000px #0f172afa inset",
-                      WebkitTextFillColor: "#f1f5f9",
+                      WebkitBoxShadow: mode === 'dark' 
+                        ? "0 0 0 1000px #0f172afa inset"
+                        : "0 0 0 1000px rgba(255,255,255,0.95) inset",
+                      WebkitTextFillColor: mode === 'dark' ? "#f1f5f9" : "#0f172a",
                     },
                     "& input:-webkit-autofill:focus": {
-                      WebkitBoxShadow: "0 0 0 1000px #0f172afa inset",
-                      WebkitTextFillColor: "#f1f5f9",
+                      WebkitBoxShadow: mode === 'dark' 
+                        ? "0 0 0 1000px #0f172afa inset"
+                        : "0 0 0 1000px rgba(255,255,255,0.95) inset",
+                      WebkitTextFillColor: mode === 'dark' ? "#f1f5f9" : "#0f172a",
                     },
                   }}
                 />
 
-                <Typography variant="body2" className="text-slate-400 mt-2">
+                <Typography 
+                  variant="body2" 
+                  sx={{ 
+                    color: mode === 'dark' ? "rgba(148,163,184,0.9)" : "rgba(100,116,139,0.9)",
+                    mt: 2 
+                  }}
+                >
                   Password must be at least 6 characters long.
                 </Typography>
 
@@ -204,7 +256,13 @@ export default function RegisterForm({ action }: RegisterFormProps) {
                   variant="contained"
                   fullWidth
                   size="large"
-                  className="mt-4 rounded-full normal-case font-semibold py-3"
+                  sx={{
+                    mt: 4,
+                    borderRadius: 999,
+                    textTransform: "none",
+                    fontWeight: 600,
+                    py: 1.5,
+                  }}
                 >
                   Create account
                 </Button>
@@ -218,9 +276,20 @@ export default function RegisterForm({ action }: RegisterFormProps) {
               justifyContent="center"
               alignItems="center"
             >
-              <Typography variant="caption" className="text-slate-400">
+              <Typography 
+                variant="caption" 
+                sx={{ 
+                  color: mode === 'dark' ? "rgba(148,163,184,0.9)" : "rgba(100,116,139,0.9)" 
+                }}
+              >
                 Already have an account?{" "}
-                <Link href="/login" underline="hover">
+                <Link 
+                  href="/login" 
+                  underline="hover"
+                  sx={{ 
+                    color: mode === 'dark' ? "#93c5fd" : "#3b82f6" 
+                  }}
+                >
                   Sign in
                 </Link>
               </Typography>

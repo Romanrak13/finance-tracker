@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, type ReactNode } from "react";
+import { useState, useMemo, useEffect, useRef, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -25,12 +25,18 @@ import SubscriptionsIcon from "@mui/icons-material/SubscriptionsOutlined";
 import InsightsIcon from "@mui/icons-material/InsightsOutlined";
 import SettingsIcon from "@mui/icons-material/SettingsOutlined";
 import { createSupabaseBrowserClient } from "@/lib/supabase/ client";
-
+import Account from "@mui/icons-material/AccountBalanceWalletOutlined";
+import { useTheme } from "@/contexts/ThemeContext";
 
 const drawerWidth = 260;
 
 const navItems = [
   { label: "Dashboard", href: "/", icon: <DashboardIcon fontSize="small" /> },
+    {
+    label: "Accounts",
+    href: "/accounts",
+    icon: <Account fontSize="small" />,
+  },
   {
     label: "Transactions",
     href: "/transactions",
@@ -53,12 +59,54 @@ const navItems = [
   },
 ];
 
+const getCurrentUser = async () => {
+  const supabase = createSupabaseBrowserClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user?.id)
+    .single();
+
+  return { profile };
+};
+
+
+
 export function DashboardShell({ children }: { children: ReactNode }) {
   const [profileMenuAnchor, setProfileMenuAnchor] =
     useState<null | HTMLElement>(null);
+  const [profile, setProfile] = useState<{ full_name?: string; avatar_url?: string } | null>(null);
+  const [loading, setLoading] = useState(true);
+  const hasFetched = useRef(false);
 
   const pathname = usePathname();
   const router = useRouter();
+  const { mode } = useTheme();
+
+  useEffect(() => {
+    if (hasFetched.current) return;
+    
+    const fetchProfile = async () => {
+      try {
+        hasFetched.current = true;
+        const result = await getCurrentUser();
+        setProfile(result.profile);
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+        hasFetched.current = false;
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  console.log(profile,'profile');
 
   const supabase = useMemo(() => createSupabaseBrowserClient(), []);
 
@@ -86,8 +134,8 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        bgcolor: "rgba(15,23,42,0.98)",
-        borderRight: "1px solid rgb(30 41 59)",
+        bgcolor: mode === 'dark' ? "rgba(15,23,42,0.98)" : "rgba(248,250,252,0.98)",
+        borderRight: mode === 'dark' ? "1px solid rgb(30 41 59)" : "1px solid rgb(226 232 240)",
       }}
     >
       {/* Logo / Title */}
@@ -98,12 +146,12 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         >
           FINANCE TRACKER
         </Typography>
-        <Typography variant="h6" sx={{ fontWeight: 600, mt: 0.5 }}>
+        <Typography variant="h6" sx={{ fontWeight: 600, mt: 0.5, color: mode === 'dark' ? '#f8fafc' : '#0f172a' }}>
           Overview
         </Typography>
       </Box>
 
-      <Divider sx={{ borderColor: "rgba(148,163,184,0.3)" }} />
+      <Divider sx={{ borderColor: mode === 'dark' ? "rgba(148,163,184,0.3)" : "rgba(100,116,139,0.3)" }} />
 
       {/* Nav items */}
       <List sx={{ py: 1, flex: 1 }}>
@@ -119,19 +167,27 @@ export function DashboardShell({ children }: { children: ReactNode }) {
                 mx: 1,
                 mb: 0.5,
                 borderRadius: 2,
+                color: mode === 'dark' ? '#f8fafc' : '#0f172a',
                 "&.Mui-selected": {
-                  bgcolor: "rgba(56,189,248,0.16)",
-                  color: "#e5faff",
+                  bgcolor: mode === 'dark' ? "rgba(56,189,248,0.16)" : "rgba(37,99,235,0.16)",
+                  color: mode === 'dark' ? "#e5faff" : "#1e40af",
                 },
                 "&.Mui-selected:hover": {
-                  bgcolor: "rgba(56,189,248,0.24)",
+                  bgcolor: mode === 'dark' ? "rgba(56,189,248,0.24)" : "rgba(37,99,235,0.24)",
+                },
+                "&:hover": {
+                  bgcolor: mode === 'dark' ? "rgba(148,163,184,0.1)" : "rgba(100,116,139,0.1)",
                 },
               }}
             >
               <ListItemIcon
                 sx={{
                   minWidth: 36,
-                  color: selected ? "primary.light" : "rgba(148,163,184,0.9)",
+                  color: selected 
+                    ? "primary.light" 
+                    : mode === 'dark' 
+                      ? "rgba(148,163,184,0.9)" 
+                      : "rgba(100,116,139,0.9)",
                 }}
               >
                 {item.icon}
@@ -150,22 +206,13 @@ export function DashboardShell({ children }: { children: ReactNode }) {
 
       {/* Profile block */}
       <Box sx={{ px: 4, pb: 4 }}>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 3,
-            borderRadius: 4,
-            bgcolor: "rgba(15, 23, 42, 0.8)",
-            px: 3,
-            py: 2,
-          }}
-        >
+        <Box className="flex items-center gap-3 rounded-2xl p-0">
           <Avatar
             sx={{ width: 32, height: 32, fontSize: 14 }}
             alt="User avatar"
+            src={profile?.avatar_url}
           >
-            R
+            {loading ? "..." : (profile?.full_name?.charAt(0)?.toUpperCase() || "U")}
           </Avatar>
 
           <Box
@@ -177,11 +224,11 @@ export function DashboardShell({ children }: { children: ReactNode }) {
             }}
           >
             <Typography variant="body2" sx={{ fontWeight: 500 }} noWrap>
-              Roman Rak
+              {loading ? "Loading..." : (profile?.full_name || "User")}
             </Typography>
             <Typography
               variant="caption"
-              sx={{ color: "rgba(148,163,184,0.9)" }}
+              sx={{ color: mode === 'dark' ? "rgba(148,163,184,0.9)" : "rgba(100,116,139,0.9)" }}
               noWrap
             >
               Personal plan
@@ -191,7 +238,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
           <IconButton
             size="small"
             onClick={handleProfileMenuOpen}
-            sx={{ color: "rgba(148,163,184,0.9)" }}
+            sx={{ color: mode === 'dark' ? "rgba(148,163,184,0.9)" : "rgba(100,116,139,0.9)" }}
           >
             <MoreVertIcon fontSize="small" />
           </IconButton>
@@ -222,8 +269,8 @@ export function DashboardShell({ children }: { children: ReactNode }) {
       sx={{
         display: "flex",
         minHeight: "100vh",
-        bgcolor: "#020617",
-        color: "#f8fafc",
+        bgcolor: mode === 'dark' ? "#020617" : "#ffffff",
+        color: mode === 'dark' ? "#f8fafc" : "#0f172a",
       }}
     >
       <Drawer
@@ -248,8 +295,9 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         sx={{
           flexGrow: 1,
           minHeight: "100vh",
-          bgcolor:
-            "radial-gradient(circle at 0% 0%, rgba(37,99,235,0.18), transparent 55%), radial-gradient(circle at 100% 100%, rgba(34,197,94,0.14), transparent 55%), #020617",
+          bgcolor: mode === 'dark'
+            ? "radial-gradient(circle at 0% 0%, rgba(37,99,235,0.18), transparent 55%), radial-gradient(circle at 100% 100%, rgba(34,197,94,0.14), transparent 55%), #020617"
+            : "radial-gradient(circle at 0% 0%, rgba(37,99,235,0.08), transparent 55%), radial-gradient(circle at 100% 100%, rgba(34,197,94,0.06), transparent 55%), #ffffff",
         }}
       >
         {/* offset for any future AppBar */}

@@ -9,7 +9,14 @@ import {
   Avatar,
   Stack,
   Paper,
+  Card,
+  CardContent,
+  Switch,
+  FormControlLabel,
 } from "@mui/material";
+import LightModeIcon from "@mui/icons-material/LightMode";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
+import { useTheme } from "@/contexts/ThemeContext";
 
 
 type ProfileFormProps = {
@@ -28,6 +35,7 @@ export default function ProfileForm({
   const [previewUrl, setPreviewUrl] = React.useState<string | null>(
     initialAvatarUrl || null
   );
+  const { mode, toggleTheme } = useTheme();
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -53,8 +61,8 @@ export default function ProfileForm({
         sx={{
           p: 3,
           borderRadius: 3,
-          bgcolor: "rgba(15,23,42,0.95)",
-          border: "1px solid rgba(148,163,184,0.4)",
+          bgcolor: mode === 'dark' ? "rgba(15,23,42,0.95)" : "rgba(248,250,252,0.95)",
+          border: mode === 'dark' ? "1px solid rgba(148,163,184,0.4)" : "1px solid rgba(226,232,240,0.4)",
           backdropFilter: "blur(12px)",
         }}
       >
@@ -81,7 +89,7 @@ export default function ProfileForm({
                 </Typography>
                 <Typography
                   variant="body2"
-                  sx={{ color: "rgba(148,163,184,0.9)", mb: 1 }}
+                  sx={{ color: mode === 'dark' ? "rgba(148,163,184,0.9)" : "rgba(100,116,139,0.9)", mb: 1 }}
                 >
                   JPG, PNG, up to 5MB.
                 </Typography>
@@ -95,8 +103,8 @@ export default function ProfileForm({
                     borderRadius: 999,
                     px: 3,
                     py: 0.6,
-                    color: "white",
-                    borderColor: "rgba(148,163,184,0.4)",
+                    color: mode === 'dark' ? "white" : "inherit",
+                    borderColor: mode === 'dark' ? "rgba(148,163,184,0.4)" : "rgba(203,213,225,0.4)",
                   }}
                 >
                   Upload new
@@ -117,10 +125,10 @@ export default function ProfileForm({
               label="Full Name"
               defaultValue={initialName}
               fullWidth
-              InputLabelProps={{ sx: { color: "#cbd5e1" } }}
+              InputLabelProps={{ sx: { color: mode === 'dark' ? "#cbd5e1" : "#64748b" } }}
               InputProps={{
                 sx: {
-                  color: "white",
+                  color: mode === 'dark' ? "white" : "inherit",
                 },
               }}
             />
@@ -130,10 +138,11 @@ export default function ProfileForm({
               label="Email"
               value={email}
               fullWidth
+              InputLabelProps={{ sx: { color: mode === 'dark' ? "#cbd5e1" : "#64748b" } }}
               InputProps={{
                 readOnly: true,
                 sx: {
-                  color: "#94a3b8",
+                  color: mode === 'dark' ? "#94a3b8" : "#64748b",
                 },
               }}
             />
@@ -156,6 +165,69 @@ export default function ProfileForm({
             </Box>
           </Stack>
         </form>
+      </Paper>
+
+      {/* Theme Settings */}
+      <Paper
+        elevation={0}
+        sx={{
+          p: 3,
+          borderRadius: 3,
+          bgcolor: mode === 'dark' ? "rgba(15,23,42,0.95)" : "rgba(248,250,252,0.95)",
+          border: mode === 'dark' ? "1px solid rgba(148,163,184,0.4)" : "1px solid rgba(226,232,240,0.4)",
+          backdropFilter: "blur(12px)",
+          mt: 3,
+        }}
+      >
+        <Typography variant="h6" sx={{ mb: 2, fontWeight: 600 }}>
+          Appearance
+        </Typography>
+        
+        <Card
+          elevation={0}
+          sx={{
+            bgcolor: mode === 'dark' ? "rgba(30,41,59,0.5)" : "rgba(241,245,249,0.5)",
+            border: mode === 'dark' ? "1px solid rgba(148,163,184,0.2)" : "1px solid rgba(203,213,225,0.2)",
+          }}
+        >
+          <CardContent sx={{ p: 3 }}>
+            <Stack direction="row" alignItems="center" justifyContent="space-between">
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                {mode === 'dark' ? (
+                  <DarkModeIcon sx={{ color: 'primary.main' }} />
+                ) : (
+                  <LightModeIcon sx={{ color: 'primary.main' }} />
+                )}
+                <Box>
+                  <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                    {mode === 'dark' ? 'Dark Mode' : 'Light Mode'}
+                  </Typography>
+                  <Typography 
+                    variant="body2" 
+                    sx={{ 
+                      color: mode === 'dark' ? "rgba(148,163,184,0.9)" : "rgba(100,116,139,0.9)",
+                      fontSize: 13 
+                    }}
+                  >
+                    Switch between light and dark appearance
+                  </Typography>
+                </Box>
+              </Box>
+              
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={mode === 'dark'}
+                    onChange={toggleTheme}
+                    color="primary"
+                  />
+                }
+                label=""
+                sx={{ m: 0 }}
+              />
+            </Stack>
+          </CardContent>
+        </Card>
       </Paper>
     </Box>
   );
